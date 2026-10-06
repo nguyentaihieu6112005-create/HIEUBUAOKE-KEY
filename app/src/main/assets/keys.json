@@ -1,15 +1,50 @@
-package com.hieubuaoke.app.util
+package com.hieubuaoke.app.security
 
 import android.content.Context
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-object JsonLoader {
-    fun load(context: Context, assetPath: String): JSONObject {
-        val input = context.assets.open(assetPath)
+data class KeyValidationResult(
+    val valid: Boolean,
+    val message: String,
+    val type: String = "FREE"
+)
+
+class KeyValidator(private val context: Context) {
+    fun validate(key: String): KeyValidationResult {
+        return try {
+            val json = loadKeysJson()
+            val monthly = json.optJSONArray("monthly") ?: return KeyValidationResult(false, "KEY THÁNG KHÔNG HỢP LỆ.")
+            val lifetime = json.optJSONArray("lifetime") ?: return KeyValidationResult(false, "KEY VĨNH VIỄN KHÔNG HỢP LỆ.")
+
+            for (i in 0 until monthly.length()) {
+                val item = monthly.getJSONObject(i)
+                val savedKey = item.optString("key", "")
+                val active = item.optBoolean("active", false)
+                if (savedKey == key && active) {
+                    return KeyValidationResult(true, "KEY THÁNG HỢP LỆ.", "MONTHLY")
+                }
+            }
+
+            for (i in 0 until lifetime.length()) {
+                val item = lifetime.getJSONObject(i)
+                val savedKey = item.optString("key", "")
+                val active = item.optBoolean("active", false)
+                if (savedKey == key && active) {
+                    return KeyValidationResult(true, "KEY VĨNH VIỄN HỢP LỆ.", "LIFETIME")
+                }
+            }
+
+            KeyValidationResult(false, "KEY KHÔNG TỒN TẠI HOẶC KHÔNG HỢP LỆ.")
+        } catch (e: Exception) {
+            KeyValidationResult(false, "LỖI ĐỌC KEY / DỮ LIỆU KHÔNG HỢP LỆ.")
+        }
+    }
+
+    private fun loadKeysJson(): JSONObject {
+        val input = context.assets.open("keys.json")
         val reader = BufferedReader(InputStreamReader(input, "UTF-8"))
-        val text = reader.use { it.readText() }
-        return JSONObject(text)
+        return JSONObject(reader.use { it.readText() })
     }
 }

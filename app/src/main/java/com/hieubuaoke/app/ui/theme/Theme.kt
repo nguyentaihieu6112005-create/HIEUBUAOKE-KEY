@@ -28,14 +28,13 @@ private val DarkColors = darkColorScheme(
     onSecondary = Color.Black,
     onBackground = HieuBuaokeColors.TextPrimary,
     onSurface = HieuBuaokeColors.TextPrimary,
-    error = HieuBuaokeColors.Error,
+    error = HieuBuaokeColors.Error
 )
 
 @Composable
 fun HieuBuaokeTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = DarkColors,
-        content = content,
-        typography = androidx.compose.material3.Typography(),
+        content = content
     )
 }
