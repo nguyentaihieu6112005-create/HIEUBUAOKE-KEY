@@ -1,0 +1,15 @@
+package com.hieubuaoke.app.util
+
+import android.content.Context
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+
+object JsonLoader {
+    fun load(context: Context, assetPath: String): JSONObject {
+        val input = context.assets.open(assetPath)
+        val reader = BufferedReader(InputStreamReader(input, "UTF-8"))
+        val text = reader.use { it.readText() }
+        return JSONObject(text)
+    }
+}
