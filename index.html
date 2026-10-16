@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HIEUBUAOKE • Đóng gói & tải xuống</title>
+<style>
+:root{color-scheme:dark;--bg:#050807;--card:#0d1b14;--card2:#10251a;--green:#39ff88;--cyan:#00e5ff;--text:#e8fff0;--muted:#8fa99a;--line:#24583c;--red:#ff5c6c;--yellow:#ffd54a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#10251a 0,#050807 58%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{max-width:900px;margin:auto;padding:18px 14px 42px}.header,.panel,.filebox,.result{border:1px solid var(--line);background:rgba(13,27,20,.94);border-radius:18px;box-shadow:0 0 20px #00e5ff0a}
+.header{padding:18px;display:flex;align-items:center;gap:12px;margin-bottom:14px}.logo{font-weight:900;color:var(--green);letter-spacing:1.2px;font-size:20px;text-shadow:0 0 16px #39ff8840}.sub,.muted{color:var(--muted);font-size:12px}.badge{margin-left:auto;color:var(--cyan);border:1px solid var(--line);padding:7px 9px;border-radius:10px;font-size:11px;white-space:nowrap}
+.panel{padding:16px;margin-bottom:14px}.section{font-weight:800;color:var(--cyan);letter-spacing:.6px;margin:0 0 12px}.field{display:grid;gap:8px;margin:10px 0}.field label{color:var(--muted);font-size:13px}input[type=file],input[type=text],select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#07100b;color:var(--text)}
+button,.button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--green);background:var(--green);color:#061009;font-weight:850;padding:12px 15px;border-radius:12px;cursor:pointer;text-decoration:none;min-height:44px}
+button.secondary{background:#10251a;color:var(--cyan);border-color:var(--line)}button:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}.status{padding:10px 12px;border-radius:10px;background:#07100b;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}.status.ok{color:var(--green)}.status.err{color:var(--red)}.status.warn{color:var(--yellow)}
+.filebox{padding:12px;margin:10px 0;overflow-wrap:anywhere}.filebox strong{display:block;margin-bottom:4px}.list{max-height:300px;overflow:auto}.asset{padding:10px;border:1px solid #1d3d2c;border-radius:12px;margin:7px 0;display:flex;align-items:center;gap:10px}.asset .meta{flex:1;min-width:0}.asset small{display:block;color:var(--muted);overflow-wrap:anywhere}.asset button{padding:8px 10px;min-height:36px;font-size:12px}
+.result{padding:16px;border-color:#39ff8870}.big{font-size:22px;color:var(--green);font-weight:900}.checks{display:grid;gap:8px;margin:14px 0}.checks div{color:var(--muted)}.checks b{color:var(--green)}.hidden{display:none!important}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:12px}
+@media(max-width:520px){.header{align-items:flex-start}.logo{font-size:17px}.badge{font-size:10px}.row>*{flex-basis:100%}}
+</style>
+</head>
+<body><main>
+<header class="header"><div><div class="logo">HIEUBUAOKE</div><div class="sub">BỘ CÔNG CỤ ASSET UNITY</div></div><div class="badge">ĐÓNG GÓI • TẢI XUỐNG</div></header>
+
+<section class="panel">
+<h2 class="section">01 / KẾT NỐI BỘ PARSER</h2>
+<div class="field"><label for="api">Địa chỉ API UnityPy</label><input id="api" type="text" value="http://127.0.0.1:8000" autocomplete="url"></div>
+<div class="row"><button id="health">Kiểm tra API</button><button id="inspect" class="secondary" disabled>Phân tích file</button></div>
+<div id="apiStatus" class="status">Chưa kết nối. Nhập địa chỉ API đang chạy rồi kiểm tra.</div>
+</section>
+
+<section class="panel">
+<h2 class="section">02 / FILE GỐC</h2>
+<div class="field"><label for="bundle">Chọn AssetBundle / SerializedFile</label><input id="bundle" type="file"></div>
+<div id="originalInfo" class="filebox muted">Chưa chọn file. File gốc không bị ghi đè.</div>
+<div class="field"><label for="filter">Lọc asset theo tên, class hoặc Path ID</label><input id="filter" type="text" placeholder="Nhập từ khóa…" disabled></div>
+<div id="assetStatus" class="status">Chưa phân tích.</div>
+<div id="assets" class="list"></div>
+</section>
+
+<section class="panel">
+<h2 class="section">03 / THAY TEXTURE & ĐÓNG GÓI</h2>
+<div id="selected" class="filebox muted">Chọn một Texture2D từ danh sách sau khi phân tích.</div>
+<div class="field"><label for="replacement">Ảnh thay thế</label><input id="replacement" type="file" accept="image/png,image/jpeg,image/webp" disabled></div>
+<div id="replacementInfo" class="status">Chưa chọn ảnh thay thế.</div>
+<button id="package" disabled>ĐÓNG GÓI FILE ĐÃ SỬA</button>
+<div id="packageStatus" class="status">Chưa có file đầu ra.</div>
+</section>
+
+<section id="result" class="result hidden">
+<h2 class="section">04 / TẢI FILE ĐÃ ĐÓNG GÓI</h2>
+<div class="filebox"><strong id="outName">—</strong><span class="muted" id="outType">—</span><div class="big" id="outSize">—</div><div class="muted" id="outBytes">—</div></div>
+<div class="checks">
+<div>✓ <b>Parser:</b> <span id="outVerified">—</span></div>
+<div>✓ <b>SHA-256:</b> <span id="outHash" class="muted"></span></div>
+<div>✓ <b>File gốc:</b> <span id="outOriginal" class="muted"></span></div>
+<div>✓ <b>Texture:</b> <span id="outTexture" class="muted"></span></div>
+</div>
+<div class="row"><button id="download">TẢI XUỐNG</button><button id="again" class="secondary">ĐÓNG GÓI LẠI</button></div>
+<div class="status warn">File đầu ra đã được mở lại bằng parser để kiểm tra. Điều này không đảm bảo mọi game/Unity build sẽ chấp nhận bundle; hãy thử trong môi trường tương thích.</div>
+</section>
+<footer>Không hiển thị dung lượng hoặc trạng thái giả. Thông tin đầu ra lấy từ response và Blob thực tế.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let originalFile=null, parsedObjects=[], selectedTexture=null, outputBlob=null, outputName="", outputMeta=null;
+const sizeFmt=n=>{if(!Number.isFinite(n))return "Không rõ";const u=["B","KB","MB","GB"];let i=0,v=n;while(v>=1024&&i<u.length-1){v/=1024;i++}return `${v.toLocaleString("vi-VN",{maximumFractionDigits:2})} ${u[i]}`};
+const apiBase=()=> $("api").value.trim().replace(/\/+$/,"");
+function status(id,msg,kind=""){const e=$(id);e.textContent=msg;e.className="status "+kind}
+function fileKind(name){const ext=(name.split(".").pop()||"").toLowerCase();return ext?ext.toUpperCase():"Không rõ"}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+async function jsonOrError(res){let data;try{data=await res.json()}catch{throw Error("API trả về dữ liệu không phải JSON.")}if(!res.ok)throw Error(typeof data.detail==="string"?data.detail:JSON.stringify(data.detail||data));return data}
+$("bundle").addEventListener("change",()=>{originalFile=$("bundle").files[0]||null;parsedObjects=[];selectedTexture=null;outputBlob=null;$("assets").replaceChildren();$("result").classList.add("hidden");$("inspect").disabled=!originalFile;$("filter").disabled=true;$("replacement").disabled=true;$("package").disabled=true;$("selected").textContent="Chọn một Texture2D từ danh sách sau khi phân tích.";status("assetStatus","Chưa phân tích.");status("packageStatus","Chưa có file đầu ra.");if(originalFile){$("originalInfo").innerHTML=`<strong>${escapeHtml(originalFile.name)}</strong><span class="muted">${sizeFmt(originalFile.size)} · ${originalFile.size.toLocaleString("vi-VN")} byte · ${fileKind(originalFile.name)}</span>`;}else $("originalInfo").textContent="Chưa chọn file."});
+$("health").onclick=async()=>{status("apiStatus","Đang kiểm tra API…");try{const r=await fetch(apiBase()+"/health");const d=await jsonOrError(r);status("apiStatus",`Đã kết nối · Parser: ${d.parser} · Giới hạn: ${sizeFmt(d.max_upload_bytes)}`,"ok")}catch(e){status("apiStatus","Không kết nối được: "+e.message,"err")}};
+$("inspect").onclick=async()=>{if(!originalFile)return;const fd=new FormData();fd.append("file",originalFile);status("assetStatus","Đang gửi file và phân tích bằng UnityPy…");$("inspect").disabled=true;try{const d=await jsonOrError(await fetch(apiBase()+"/api/inspect",{method:"POST",body:fd}));parsedObjects=d.objects||[];$("filter").disabled=false;renderAssets();status("assetStatus",`Phân tích xong · ${d.object_count} object · Unity ${d.unity_version||"chưa xác định"} · SHA-256 ${d.original_sha256}`,"ok")}catch(e){status("assetStatus","Phân tích thất bại: "+e.message,"err")}finally{$("inspect").disabled=!originalFile}};
+function renderAssets(){const q=$("filter").value.toLowerCase().trim();const arr=parsedObjects.filter(o=>[o.name,o.class,o.path_id].some(v=>String(v??"").toLowerCase().includes(q)));$("assets").replaceChildren();if(!arr.length){$("assets").textContent="Không có asset phù hợp hoặc parser không trả về object.";return}for(const o of arr){const row=document.createElement("div");row.className="asset";const meta=document.createElement("div");meta.className="meta";meta.innerHTML=`<strong>${escapeHtml(o.name)}</strong><small>${escapeHtml(o.class)} · Path ID ${escapeHtml(o.path_id)} · ${o.byte_size==null?"kích thước không rõ":sizeFmt(Number(o.byte_size))}${o.width?` · ${o.width}×${o.height}`:""}</small>`;row.append(meta);const btn=document.createElement("button");btn.className="secondary";btn.textContent=o.class==="Texture2D"?"Chọn":"Chi tiết";btn.disabled=o.class!=="Texture2D";btn.onclick=()=>selectTexture(o);row.append(btn);$("assets").append(row)}}
+$("filter").addEventListener("input",renderAssets);
+function selectTexture(o){selectedTexture=o;$("selected").innerHTML=`<strong>${escapeHtml(o.name)}</strong><span class="muted">Texture2D · Path ID ${escapeHtml(o.path_id)} · ${o.width||"?"}×${o.height||"?"} · Format ${escapeHtml(o.format||"không rõ")}</span>`;$("replacement").disabled=false;$("package").disabled=!($("replacement").files[0]);status("packageStatus","Đã chọn texture. Chọn ảnh thay thế để tiếp tục.")}
+$("replacement").addEventListener("change",()=>{const f=$("replacement").files[0];status("replacementInfo",f?`${f.name} · ${sizeFmt(f.size)} · ${fileKind(f.name)}`:"Chưa chọn ảnh thay thế.",f?"ok":"");$("package").disabled=!(originalFile&&selectedTexture&&f);$("result").classList.add("hidden")});
+$("package").onclick=async()=>{const replacement=$("replacement").files[0];if(!originalFile||!selectedTexture||!replacement)return;const fd=new FormData();fd.append("file",originalFile,originalFile.name);fd.append("path_id",selectedTexture.path_id);fd.append("replacement",replacement,replacement.name);$("package").disabled=true;status("packageStatus","Đang thay texture, đóng gói và xác minh file đầu ra bằng parser…");try{const res=await fetch(apiBase()+"/api/replace-texture",{method:"POST",body:fd});if(!res.ok){let d;try{d=await res.json()}catch{}throw Error(d?.detail||`Lỗi HTTP ${res.status}`)}outputBlob=await res.blob();if(!outputBlob.size)throw Error("Parser trả về file rỗng; đã hủy tải xuống.");outputName=res.headers.get("X-Output-Name")||`${originalFile.name.replace(/\.[^.]+$/,"")}_edited.bundle`;const serverSize=Number(res.headers.get("X-Output-Size"));if(Number.isFinite(serverSize)&&serverSize!==outputBlob.size)throw Error("Dung lượng response không khớp; không cho tải file.");const digest=await crypto.subtle.digest("SHA-256",await outputBlob.arrayBuffer());const hash=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");outputMeta={hash,serverHash:res.headers.get("X-Output-SHA256"),verified:res.headers.get("X-Parser-Verified")==="true",originalSize:originalFile.size,originalHash:res.headers.get("X-Original-SHA256"),type:fileKind(outputName),texture:`Path ID ${selectedTexture.path_id} · ${res.headers.get("X-Texture-Width")||"?"}×${res.headers.get("X-Texture-Height")||"?"}`};$("outName").textContent=outputName;$("outType").textContent=`Định dạng theo phần mở rộng: ${outputMeta.type} · MIME: ${outputBlob.type||"application/octet-stream"}`;$("outSize").textContent=sizeFmt(outputBlob.size);$("outBytes").textContent=`${outputBlob.size.toLocaleString("vi-VN")} byte thực`; $("outVerified").textContent=outputMeta.verified?"Đã mở lại và đọc được bằng UnityPy":"Chưa xác minh";$("outHash").textContent=hash+(outputMeta.serverHash&&outputMeta.serverHash!==hash?" · CẢNH BÁO: hash máy chủ khác hash trình duyệt":"");$("outOriginal").textContent=`${originalFile.name} · ${sizeFmt(originalFile.size)} · file gốc trong trình duyệt không bị ghi đè`;$("outTexture").textContent=outputMeta.texture;$("result").classList.remove("hidden");status("packageStatus","Đóng gói thành công; file đầu ra đã được kiểm tra lại bằng parser.","ok");$("result").scrollIntoView({behavior:"smooth",block:"start"})}catch(e){outputBlob=null;$("result").classList.add("hidden");status("packageStatus","Đóng gói thất bại: "+e.message,"err")}finally{$("package").disabled=!(originalFile&&selectedTexture&&$("replacement").files[0])}};
+$("download").onclick=()=>{if(!outputBlob)return;const url=URL.createObjectURL(outputBlob);const a=document.createElement("a");a.href=url;a.download=outputName;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)};
+$("again").onclick=()=>$("package").click();
+</script></body></html>
